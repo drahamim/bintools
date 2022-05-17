@@ -44,7 +44,7 @@ def parse_arguments():
     config.add_argument("-c", "--country", help="Country short code")
     config.add_argument("-l", "--locality", help="Locality/City")
     config.add_argument("-s", "--state", help="State Name")
-    config.add_argument("-o", "--org", help="Orginization Name", required=True)
+    config.add_argument("-o", "--org", help="Organization Name", required=True)
 
     if parser.parse_args().command:
         return parser.parse_args()
