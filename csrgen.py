@@ -9,10 +9,45 @@ Simple script to handle generating Certificate Signing Requests (CSR)
 This has the ability to generate CSRs with and without a provided key.
 Also can handle multiple domains as Subject Alternative Name (SAN) records.
 """
+config_template = """[ req ]
+        default_bits           = 2048
+        distinguished_name     = req_distinguished_name
+        prompt                 = no
+        req_extensions         = v3_req
+[ req_distinguished_name ]
+    {% if c is not none -%}
+        C                      = {{s}}
+    {%- endif %}
+    {%- if l is not none -%}
+        L                      = {{l}}
+    {%- endif %}
+    {%- if s is not none -%}
+        ST                     = {{s}}
+    {%- endif %}
+    {%- if o is not none -%}
+        O                      = {{o}}
+    {%- endif %}
+{{'    CN                     = {{ cn }}
+[ v3_req ]
+    subjectAltName          = @alt_names
+
+[alt_names]
+    DNS.1 = {{ cn }}
+    {%- for domain in sans %}
+        {%- if domain %}
+    DNS.{{ loop.index +1 }} = {{ domain }}
+        {%- endif %}
+    {%- endfor %}
+'}}
+"""
 
 
 def check_file(file):
-    if os.stat(file).st_size > 0:
+    try:
+        os.stat(file).st_size > 1
+    except:
+        return False
+    else:
         return file
 
 
@@ -53,8 +88,14 @@ def parse_arguments():
 
 
 def main(args):
+    tm = Template(config_template)
+    if args.command == 'config':
 
-    print("end test")
+       print(tm.render(c=args.country, l=args.locality,
+                  s=args.state, o=args.org))
+
+    else:
+        print("test failed")
 
 
 if __name__ == '__main__':
