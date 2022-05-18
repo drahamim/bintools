@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import fnmatch
 import re
 import os
 from jinja2 import Template
@@ -10,10 +11,10 @@ This has the ability to generate CSRs with and without a provided key.
 Also can handle multiple domains as Subject Alternative Name (SAN) records.
 """
 config_template = """[ req ]
-        default_bits           = 2048
-        distinguished_name     = req_distinguished_name
-        prompt                 = no
-        req_extensions         = v3_req
+    default_bits           = 2048
+    distinguished_name     = req_distinguished_name
+    prompt                 = no
+    req_extensions         = v3_req
 [ req_distinguished_name ]
     {% if c is not none -%}
         C                      = {{s}}
@@ -74,6 +75,7 @@ def parse_arguments():
     csr.add_argument('-k', "--key", type=check_file, help='Specify a key')
     csr.add_argument('-d', "--domain", type=check_domain, required=True,
                      help="Specify a domain or a file with list of domains")
+    csr.add_argument("-o", "--org", help="Organization Name")
 
     config = subparser.add_parser("config", help="Create config file")
     config.add_argument("-c", "--country", help="Country short code")
@@ -85,17 +87,38 @@ def parse_arguments():
         return parser.parse_args()
     else:
         parser.print_help()
+        exit()
 
+def gen_csr():
+    print("Generating CSR..")
+    
 
 def main(args):
-    tm = Template(config_template)
-    if args.command == 'config':
+    # Look for presence of 1 or more config files
+    if args.command == 'csr':
+        config_file_search = fnmatch.filter(os.listdir(), "*_gen_config")
+        if len(config_file_search) == 0:
+            print("No config files found please run with 'config -h' to create one")
+            exit()
+        elif len(config_file_search) > 1:   # Check if there is more then one config file
+            if args.org:
+                if check_file({args.org + "_gen_config"}):
+                    gen_csr()
+            else:
+                print("Please specify Organization name with -o <Org>")
+                exit()
+        else:  # there is only one found so assume its the right one
+            gen_csr()
 
-       print(tm.render(c=args.country, l=args.locality,
-                  s=args.state, o=args.org))
-
-    else:
-        print("test failed")
+    elif args.command == 'config':
+        tm = Template(config_template)
+        config_file_name = args.org + "_gen_config"
+        print("Creating config template file: {filename}".format(
+            filename=config_file_name))
+        config_file = open(config_file_name, "w")
+        config_file.write(tm.render(c=args.country, l=args.locality,
+                                    s=args.state, o=args.org))
+        config_file.close()
 
 
 if __name__ == '__main__':
