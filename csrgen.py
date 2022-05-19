@@ -167,11 +167,11 @@ def main(args):
             print("Key Generated")
 
         if args.key:
-            print("Generatinc CSR")
+            print("Generating CSR")
             subprocess.call(['openssl', 'req', '-new', '-config', csr_config_out,
                              '-key',  + args.key, '-out', args.domain + '.csr'])
         else:
-            print("Generatinc CSR")
+            print("Generating CSR")
             subprocess.call(['openssl', 'req', '-new', '-config', csr_config_out,
                              '-key', args.domain + '.key', '-out', args.domain + '.csr'])
 
