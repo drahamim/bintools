@@ -97,7 +97,6 @@ def parse_arguments():
 
 
 def gen_csr_config(args, config_file):
-    
     tm = env.get_template(config_file)
     print(config_file)
     SANS = list()
@@ -128,7 +127,7 @@ def gen_csr_config(args, config_file):
     generated_csr_config = open(args.domain + '_csr_config', 'w')
     generated_csr_config.write(tm.render(cn=CN, sans=SANS))
     generated_csr_config.close()
-    
+
     return str(args.domain + '_csr_config')
 
 
@@ -151,7 +150,6 @@ def main(args):
         else:  # There is only one found so assume its the right one\
             csr_config_out = gen_csr_config(args, config_file_search[0])
 
-
         # Validate key argument and file
         if args.key:
             if check_file(args.key):
@@ -168,7 +166,6 @@ def main(args):
                              args.domain + '.key', '2048'])
             print("Key Generated")
 
-        
         if args.key:
             print("Generatinc CSR")
             subprocess.call(['openssl', 'req', '-new', '-config', csr_config_out,
@@ -178,7 +175,7 @@ def main(args):
             subprocess.call(['openssl', 'req', '-new', '-config', csr_config_out,
                              '-key', args.domain + '.key', '-out', args.domain + '.csr'])
 
-    elif args.command == 'config':
+    if args.command == 'config':
         tm = Template(config_template)
         config_file_name = args.org + "_gen_config"
         print("Creating config template file: {filename}".format(
