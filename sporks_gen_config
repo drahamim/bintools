@@ -4,7 +4,7 @@
     prompt                 = no
     req_extensions         = v3_req
 [ req_distinguished_name ]
-    O                      = bork
+    O                      = sporks
     CN                     = {{ cn }}
 [ v3_req ]
     subjectAltName          = @alt_names
